@@ -7,6 +7,9 @@
 extern double f1 (double x);
 extern double f2 (double x);
 extern double f3 (double x);
+extern double f1_d2 (double x);
+extern double f2_d2 (double x);
+extern double f3_d2 (double x);
 
 
 int it_cnt = 0; //число итераций
@@ -26,15 +29,17 @@ double root(double(*f)(double), double(*g)(double), double a, double b, double e
     return (a + b) / 2;
 }
 // функция для вычисления интеграла по методу трапеций
-double integral(double (*f)(double), double a, double b, double eps){
+double integral(double (*f)(double), double (*f_d2)(double), double a, double b, double eps){
     double s = 0;
 
-    //int n = pow((b-a), 3);
+    double maxValue = f_d2(a) > f_d2(b) ? f_d2(a) : f_d2(b); // 
+    
+    int n = sqrt((pow((b-a), 3) * maxValue) / (12 * eps)) + 1;
 
-    double h = (b - a) * eps;
+    double h = (b - a) / n;
 
     while(a < b){
-        s += (f(a) + f(a + eps)) / 2 * h;
+        s += (f(a) + f(a + h)) / 2 * h;
         a += h;
     }
 
@@ -46,8 +51,8 @@ int main(int param, char *paramstr[]){
     const double eps2 = 0.001;
 
     double t13 = root(f1, f3, 0.1, 5.0, eps1); //значение абсциссы при пересечении f1 и f3
-    double t12 = root(f1, f2, 0.1, 5.0, eps1); //значение абсциссы при пересечении f1 и f2
-    double t23 = root(f2, f3, 0.1, 5.0, eps1); //значение абсциссы при пересечении f2 и f3
+    double t12 = root(f1, f2, 2.1, 5.0, eps1); //значение абсциссы при пересечении f1 и f2
+    double t23 = root(f2, f3, 2.1, 5.0, eps1); //значение абсциссы при пересечении f2 и f3
 
     if (param <= 1){
         printf ("Для справки введите в аргументах командной строки --help\n");
@@ -65,9 +70,9 @@ int main(int param, char *paramstr[]){
             
             printf("Число итераций: %d\n", it_cnt);
         }else if (strcmp(paramstr[1], "--square") == 0){
-            double s1 = integral(f1, t13, t12, eps2); // значение площади под f1
-            double s2 = integral(f3, t13, t23, eps2); // значение площади под f3
-            double s3 = integral(f2, t23, t12, eps2); // значение площади под f2
+            double s1 = integral(f1, f1_d2, t13, t12, eps2); // значение площади под f1
+            double s2 = integral(f3, f3_d2,t13, t23, eps2); // значение площади под f3
+            double s3 = integral(f2, f2_d2, t23, t12, eps2); // значение площади под f2
 
             double s = s1 - s2 - s3;
             printf("Площадь заданной фигуры: %lf\n", s);
@@ -84,9 +89,9 @@ int main(int param, char *paramstr[]){
 
             double eps = strtod(paramstr[6], &q);
 
-            double t13 = root(f1, f3, 0.1, 5.0, eps); //значение абсциссы при пересечении f1 и f3
-            double t12 = root(f1, f2, 0.1, 5.0, eps); //значение абсциссы при пересечении f1 и f2
-            double t23 = root(f2, f3, 0.1, 5.0, eps); //значение абсциссы при пересечении f2 и f3
+            double t13 = root(f1, f3, a, b, eps); //значение абсциссы при пересечении f1 и f3
+            double t12 = root(f1, f2, a, b, eps); //значение абсциссы при пересечении f1 и f2
+            double t23 = root(f2, f3, a, b, eps); //значение абсциссы при пересечении f2 и f3
 
             if ((func1 == 1 && func2 == 2) || (func2 == 1 && func1 == 2)) printf("%f\n",t12);
             else if ((func1 == 1 && func2 == 3) || (func2 == 1 && func1 == 3)) printf("%f\n",t13);
@@ -104,9 +109,9 @@ int main(int param, char *paramstr[]){
 
             double eps = strtod(paramstr[5], &q);
 
-            if (f == 1) printf("%f\n", integral(f1, a, b, eps));
-            else if (f == 2) printf("%f\n", integral(f2, a, b, eps));
-            else if (f == 3) printf("%f\n", integral(f3, a, b, eps));
+            if (f == 1) printf("%f\n", integral(f1, f1_d2, a, b, eps));
+            else if (f == 2) printf("%f\n", integral(f2, f2_d2, a, b, eps));
+            else if (f == 3) printf("%f\n", integral(f3, f3_d2, a, b, eps));
             else printf("Некорректный ввод, введите --help для справки\n");
         }else printf("Некорректный ввод, введите --help для справки\n");
     }else printf("Некорректный ввод, введите --help для справки\n");
