@@ -12,7 +12,7 @@ extern double f3 (double x);
 int it_cnt = 0; //число итераций
 
 // функция для вычисления абсциссы точки пересечения по методу деления отрезка пополам 
-double root(double(*f)(double), double(*g)(double), double a, double b, double eps1){
+double root(double(*f)(double), double(*g)(double), double a, double b, double eps){
     double c;
     do{
         it_cnt++;
@@ -21,17 +21,20 @@ double root(double(*f)(double), double(*g)(double), double a, double b, double e
         if ((f(a) - g(a)) * (f(c) - g(c)) <= 0){
             b = c;
         }else a = c;
-    } while(fabs(b - a) > 2 * eps1);
+    } while(fabs(b - a) > 2 * eps);
 
     return (a + b) / 2;
 }
 // функция для вычисления интеграла по методу трапеций
-double integral(double(*f)(double), double a, double b, double eps2){
+double integral(double (*f)(double), double a, double b, double eps){
     double s = 0;
-    double h = (b - a) * eps2;
+
+    //int n = pow((b-a), 3);
+
+    double h = (b - a) * eps;
 
     while(a < b){
-        s += (f(a) + f(a + eps2)) / 2 * h;
+        s += (f(a) + f(a + eps)) / 2 * h;
         a += h;
     }
 
